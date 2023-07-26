@@ -2,6 +2,7 @@
 
 require 'minitest/autorun'
 require 'minitest/reporters'
+require 'rbkb'
 require 'simplecov'
 require File.expand_path('../lib/mongo_db', __dir__)
 
