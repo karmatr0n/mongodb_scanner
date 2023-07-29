@@ -3,7 +3,8 @@
 source 'https://rubygems.org'
 
 gem 'bindata'
-gem 'bson', '~> 4.15'
+gem 'bson'
+gem 'openssl'
 
 group :development do
   gem 'debug'
@@ -14,8 +15,7 @@ group :test do
   gem 'minitest'
   gem 'minitest-line'
   gem 'minitest-reporters'
-  gem 'rake'
+  gem 'rbkb'
   gem 'rubocop-minitest', require: false
-  gem 'rubycritic'
   gem 'simplecov'
 end
