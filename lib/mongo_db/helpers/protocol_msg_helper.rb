@@ -2,7 +2,6 @@
 
 require 'bson'
 require 'bindata'
-require 'mongo_db/protocol'
 
 module MongoDB
   module Helpers

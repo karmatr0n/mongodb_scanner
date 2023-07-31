@@ -19,9 +19,10 @@ describe MongoDB::Protocol::OpQuery do
     }
     @described_class = MongoDB::Protocol::OpQuery
     @query_msg = @described_class.new(@query_msg_fields)
-    @binary_stream = "7\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xD4\a\x00\x00\x00\x00\x00\x00protocol-test\x00" \
-                     "\x00\x00\x00\x00\x00\x00\x00\x00\x1D\x00\x00\x00\x02$db\x00\x05\x00\x00\x00test\x00\x10ping" \
-                     "\x00\x01\x00\x00\x00\x00".dup.force_encoding('ASCII-8BIT')
+    @binary_stream = '370000000000000000000000d40700000000000070726f746f636f6c2d746573740000' \
+      '000000000000001d00000002246462000500000074657374001070696e670001000000' \
+      '00'
+        .unhexify
   end
 
   it 'responds to the header attribute' do

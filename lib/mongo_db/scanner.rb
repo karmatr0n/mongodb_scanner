@@ -1,63 +1,76 @@
 # frozen_string_literal: true
 
-require 'json'
 require_relative 'tcp_client'
+require_relative 'protocol'
 require_relative 'helpers/protocol_msg_helper'
 require_relative 'helpers/legacy_protocol_msg_helper'
+require_relative 'scan_results/finding_list'
 
 module MongoDB
   class Scanner
     include MongoDB::Helpers::ProtocolMsgHelper
     include MongoDB::Helpers::LegacyProtocolMsgHelper
-    include MongoDB::Protocol
+    include MongoDB::ScanResults
 
-    attr_reader :tcp_client, :supports_op_msg
+    attr_reader :tcp_client, :supports_op_msg, :findings
 
     def initialize(host, port)
       @tcp_client = TCPClient.new(host, port)
-      @tcp_client.connect
       @supports_op_msg = false
       @mongo_detected = false
-      @summary = {}
+      @findings = FindingList.new
     end
 
-    def scan
+    def run!
+      @tcp_client.connect
+      @findings.add(:ssl_enabled, @tcp_client.ssl_enabled)
+      perform_scan!
+      perform_legacy_scan! unless supports_op_msg?
+    end
+
+    def perform_scan!
       handshake!
-      if mongo_detected? && supports_op_msg?
-        build_info!
-        list_databases!
-      end
-      legacy_scan unless supports_op_msg?
+      return unless mongo_detected? && supports_op_msg?
+
+      build_info!
+      list_databases!
     end
 
-    def legacy_scan
+    def perform_legacy_scan!
       legacy_handshake!
-      if mongo_detected?
-        legacy_build_info!
-        legacy_list_databases!
-      end
+      return unless mongo_detected?
+
+      legacy_build_info!
+      legacy_list_databases!
     end
 
     def handshake!
       @tcp_client.write(hello_msg.to_binary_s)
       response = read_op_msgs(@tcp_client, length: 2)
-      response.first.sections.each do |section|
-        if section.payload['ok'] == 1.0 and section.payload['maxWireVersion'] >= 6
-          @summary[:hello] = section.payload.to_h
-          @supports_op_msg = true
-          @mongo_detected = true
-        end
+      documents = response.map(&:sections).map { |section| section.map(&:payload) }.flatten
+      parse_hello_response(documents)
+    end
+
+    def parse_hello_response(documents)
+      documents.each do |section|
+        parse_hello_section(section) if section['ok'] == 1.0
       end
+    end
+
+    def parse_hello_section(section)
+      @mongo_detected = true
+      @supports_op_msg = true if section['maxWireVersion'] >= 6
+      @findings.add(:hello, section.to_h)
     end
 
     def build_info!
       response = send_command(build_info_msg.to_binary_s)
-      summary_section!(:build_info, response)
+      add_finding!(:build_info, response.first)
     end
 
     def list_databases!
       response = send_command(list_databases_msg.to_binary_s)
-      summary_section!(:databases, response)
+      add_finding!(:databases, response.first)
     end
 
     def send_command(payload)
@@ -65,28 +78,23 @@ module MongoDB
       read_op_msgs(@tcp_client)
     end
 
-    def summary_section!(section, response)
-      @summary[section.to_sym] = response.first.sections.map(&:payload).to_a.map(&:to_h)
+    def add_finding!(section, response_msg)
+      @findings.add(section, response_msg.sections.map(&:payload).to_a.map(&:to_h))
     end
 
     def legacy_handshake!
       response = send_legacy_command(legacy_hello.to_binary_s)
-      response.documents.each do |section|
-        if section['ok'] == 1.0 && section['maxWireVersion'] < 6
-          @summary[:hello] = section.to_h
-          @mongo_detected = true
-        end
-      end
+      parse_hello_response(response.documents)
     end
 
     def legacy_build_info!
       response = send_legacy_command(legacy_build_info.to_binary_s)
-      legacy_summary_section!(:build_info, response)
+      legacy_add_finding!(:build_info, response)
     end
 
     def legacy_list_databases!
       response = send_legacy_command(legacy_list_databases.to_binary_s)
-      legacy_summary_section!(:databases, response)
+      legacy_add_finding!(:databases, response)
     end
 
     def send_legacy_command(payload)
@@ -94,16 +102,12 @@ module MongoDB
       read_reply_msg(@tcp_client)
     end
 
-    def legacy_summary_section!(section, response)
-      @summary[section.to_sym] = response.documents.to_a.map(&:to_h)
+    def legacy_add_finding!(section, response_msg)
+      @findings.add(section, response_msg.documents.map(&:to_h))
     end
 
-    def pretty_summary
-      if mongo_detected?
-        JSON.pretty_generate(@summary)
-      else
-        "No MongoDB detected"
-      end
+    def findings_to_json
+      @findings.to_json
     end
 
     def supports_op_msg?

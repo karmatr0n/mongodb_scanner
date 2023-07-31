@@ -8,7 +8,7 @@ describe MongoDB::Protocol::MsgHeader do
     @header_fields = { message_length: 239, request_id: 32, response_to: 0,
                        op_code: MongoDB::Protocol::OpCodes::OP_REPLY }
     @msg_header = @described_class.new(@header_fields)
-    @binary_stream = "\xEF\x00\x00\x00 \x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00".dup.force_encoding('ASCII-8BIT')
+    @binary_stream = 'ef000000200000000000000001000000'.unhexify
   end
 
   it 'responds to the message_length attribute' do

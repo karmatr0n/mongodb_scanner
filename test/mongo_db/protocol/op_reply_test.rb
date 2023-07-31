@@ -24,14 +24,14 @@ describe MongoDB::Protocol::OpReply do
     }
     @described_class = MongoDB::Protocol::OpReply
     @reply_msg = @described_class.new(@reply_msg_fields)
-    @binary_stream = "\xEF\x00\x00\x00 \x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\b\x00\x00\x00\x00\x00\x00\x00" \
-                     "\x00\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\xCB\x00\x00\x00\bismaster\x00\x01\x10maxBs" \
-                     "onObjectSize\x00\x00\x00\x00\x01\x10maxMessageSizeBytes\x00\x00l\xDC\x02\x10maxWriteBatchSi" \
-                     "ze\x00\xA0\x86\x01\x00\tlocalTime\x00\x87\x1E\t\xD9\x7F\x01\x00\x00\x10logicalSessionTimeou" \
-                     "tMinutes\x00\x1E\x00\x00\x00\x10minWireVersion\x00\x00\x00\x00\x00\x10maxWireVersion\x00" \
-                     "\x06\x00\x00\x00\breadOnly\x00\x00\x01ok\x00\x00\x00\x00\x00\x00\x00\xF0?\x00"
-                     .dup
-                     .force_encoding('ASCII-8BIT')
+    @binary_stream = 'ef00000020000000000000000100000008000000000000000000000000000000010000' \
+      '00cb0000000869736d61737465720001106d617842736f6e4f626a65637453697a6500' \
+      '00000001106d61784d65737361676553697a65427974657300006cdc02106d61785772' \
+      '697465426174636853697a6500a0860100096c6f63616c54696d6500871e09d97f0100' \
+      '00106c6f676963616c53657373696f6e54696d656f75744d696e75746573001e000000' \
+      '106d696e5769726556657273696f6e0000000000106d61785769726556657273696f6e' \
+      '000600000008726561644f6e6c790000016f6b00000000000000f03f00'
+        .unhexify
   end
 
   it 'responds to the header attribute' do

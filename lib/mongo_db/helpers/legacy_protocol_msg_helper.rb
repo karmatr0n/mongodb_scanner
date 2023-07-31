@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'bindata'
-require 'mongo_db/protocol'
 
 module MongoDB
   module Helpers

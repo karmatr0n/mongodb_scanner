@@ -13,6 +13,11 @@ bundle install
 
 ## Usage
 ```
-ruby bin/mongodb_scanner.rb -i <ip> -p <port>
+bin/mongodb_scanner -i <ip> -p <port>
 ```
 
+or
+
+```
+bin/mongodb_scanner --help
+```

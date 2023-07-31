@@ -8,14 +8,17 @@ gem 'openssl'
 
 group :development do
   gem 'debug'
-  gem 'rbkb'
+  gem 'rubocop'
+  gem 'rubocop-minitest', require: false
 end
 
 group :test do
   gem 'minitest'
   gem 'minitest-line'
   gem 'minitest-reporters'
+  gem 'minitest-spec-context'
   gem 'rbkb'
-  gem 'rubocop-minitest', require: false
+  gem 'mocha'
   gem 'simplecov'
+  gem 'rake'
 end
