@@ -5,7 +5,7 @@ require 'test_helper'
 describe MongoDB::TCPClient do
   before do
     @host = '127.0.0.1'
-    @port = 27017
+    @port = 27_017
     @tcp_client = MongoDB::TCPClient.new(@host, @port)
     @tcp_socket = mock('TCPSocket')
     @ssl_socket = mock('OpenSSL::SSL::SSLSocket')
@@ -41,13 +41,15 @@ describe MongoDB::TCPClient do
       it 'connects to the ssl service and sets the ssl socket' do
         @ssl_socket.expects(:connect)
         @tcp_client.connect
+
         assert_equal(@ssl_socket, @tcp_client.socket)
       end
 
       it 'sets the ssl_enabled to true' do
         @ssl_socket.stubs(:connect)
         @tcp_client.connect
-        assert_equal(true, @tcp_client.ssl_enabled)
+
+        assert(@tcp_client.ssl_enabled)
       end
     end
 
@@ -60,12 +62,14 @@ describe MongoDB::TCPClient do
 
       it 'connects to the service via TCP and sets the socket' do
         @tcp_client.connect
+
         assert_equal(@tcp_socket, @tcp_client.socket)
       end
 
       it 'it does not the ssl_enabled as true' do
         @tcp_client.connect
-        assert_equal(false, @tcp_client.ssl_enabled)
+
+        refute(@tcp_client.ssl_enabled)
       end
     end
 
@@ -76,7 +80,7 @@ describe MongoDB::TCPClient do
       end
 
       it 'aborts the client connection' do
-        @tcp_client.expects(:abort).with("Connection refused or timed out. Check your connection settings and try again.")
+        @tcp_client.expects(:abort).with('Connection refused or timed out. Check your connection settings and try again.')
         @tcp_client.connect
       end
     end
@@ -94,6 +98,7 @@ describe MongoDB::TCPClient do
     it 'reads data from the socket' do
       @tcp_client.connect
       @ssl_socket.expects(:read).returns('test')
+
       assert_equal('test', @tcp_client.read)
     end
   end
@@ -114,6 +119,7 @@ describe MongoDB::TCPClient do
 
     it 'returns an ssl conext' do
       OpenSSL::SSL::SSLSocket.expects(:new).returns(@ssl_socket)
+
       assert_equal(@ssl_socket, @tcp_client.ssl_socket)
     end
   end
@@ -128,6 +134,7 @@ describe MongoDB::TCPClient do
     it 'returns a tcp socket' do
       @tcp_socket.stubs(:setsockopt).with(Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1)
       TCPSocket.expects(:open).with(@host, @port).returns(@tcp_socket)
+
       assert_equal(@tcp_socket, @tcp_client.tcp_socket)
     end
   end

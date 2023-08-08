@@ -12,7 +12,7 @@ SimpleCov.start
 
 require 'minitest/autorun'
 require 'minitest/reporters'
-require "minitest-spec-context"
+require 'minitest-spec-context'
 require 'mocha/minitest'
 require 'rbkb'
 require File.expand_path('../lib/mongo_db', __dir__)

@@ -1,9 +1,11 @@
+# frozen_string_literal: true
+
 require 'test_helper'
 
 describe MongoDB::ScanResults::Finding do
   before do
     @title = 'title'
-    @description ='description'
+    @description = 'description'
     @finding = MongoDB::ScanResults::Finding.new(@title, @description)
   end
 

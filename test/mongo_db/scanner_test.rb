@@ -5,13 +5,13 @@ require 'test_helper'
 describe MongoDB::Scanner do
   before do
     @host = '127.0.0.1'
-    @port = 27017
+    @port = 27_017
     @tcp_client = mock('MongoDB::TCPClient')
     MongoDB::TCPClient.stubs(:new).returns(@tcp_client)
     @findings = mock('MongoDB::ScanResults::FindingList')
     MongoDB::ScanResults::FindingList.stubs(:new).returns(@findings)
     @logger = mock('Logger')
-    Logger.stubs(:new).with(STDOUT).returns(@logger)
+    Logger.stubs(:new).with($stdout).returns(@logger)
     @scanner = MongoDB::Scanner.new(@host, @port)
   end
 
@@ -172,21 +172,24 @@ describe MongoDB::Scanner do
     it 'detects mongodb with supports for OpMsg' do
       @documents = [@hello, { 'ok' => 0.0, 'code' => 13 }]
       @scanner.parse_hello_response(@documents)
-      assert(@scanner.mongo_detected?)
-      assert(@scanner.supports_op_msg?)
+
+      assert_predicate(@scanner, :mongo_detected?)
+      assert_predicate(@scanner, :supports_op_msg?)
     end
 
     it 'detects mongodb without support for OpMsg' do
       @hello['maxWireVersion'] = 5.1
       @scanner.parse_hello_response([@hello, { 'ok' => 0.0, 'code' => 13 }])
-      assert(@scanner.mongo_detected?)
-      assert(!@scanner.supports_op_msg?)
+
+      assert_predicate(@scanner, :mongo_detected?)
+      refute_predicate(@scanner, :supports_op_msg?)
     end
 
     it 'does not detect mongodb' do
       @scanner.parse_hello_response([{ 'ok' => 0.0, 'code' => 13 }])
-      assert(!@scanner.mongo_detected?)
-      assert(!@scanner.supports_op_msg?)
+
+      refute_predicate(@scanner, :mongo_detected?)
+      refute_predicate(@scanner, :supports_op_msg?)
     end
   end
 
@@ -201,15 +204,17 @@ describe MongoDB::Scanner do
 
     it 'sets mongo as detected and with supports for OpMsg' do
       @scanner.parse_hello_section(@section)
-      assert(@scanner.mongo_detected?)
-      assert(@scanner.supports_op_msg?)
+
+      assert_predicate(@scanner, :mongo_detected?)
+      assert_predicate(@scanner, :supports_op_msg?)
     end
 
     it 'detects mongodb without support for OpMsg' do
       @section['maxWireVersion'] = 5.1
       @scanner.parse_hello_section(@section)
-      assert(@scanner.mongo_detected?)
-      assert(!@scanner.supports_op_msg?)
+
+      assert_predicate(@scanner, :mongo_detected?)
+      refute_predicate(@scanner, :supports_op_msg?)
     end
 
     it 'adds the hello response to the findings' do
@@ -221,7 +226,7 @@ describe MongoDB::Scanner do
   describe '#build_info!' do
     before do
       @cmd = mock('MongoDB::Protocol::OpMsg')
-      @binary_stream = ('binary string')
+      @binary_stream = 'binary string'
       @cmd.stubs(:to_binary_s).returns(@binary_stream)
       @scanner.stubs(:build_info_msg).returns(@cmd)
       @tcp_client.stubs(:write).with(@binary_stream)
@@ -254,7 +259,7 @@ describe MongoDB::Scanner do
   describe '#list_database!' do
     before do
       @cmd = mock('MongoDB::Protocol::OpMsg')
-      @binary_stream = ('binary string')
+      @binary_stream = 'binary string'
       @cmd.stubs(:to_binary_s).returns(@binary_stream)
       @scanner.stubs(:list_databases_msg).returns(@cmd)
       @tcp_client.stubs(:write).with(@binary_stream)
@@ -299,6 +304,7 @@ describe MongoDB::Scanner do
     it 'reads the response from the MongoDB service' do
       @tcp_client.stubs(:write).with(@cmd)
       @scanner.expects(:read_op_msgs).with(@tcp_client).returns(@response)
+
       assert_equal(@response, @scanner.send_command!(@cmd))
     end
   end
@@ -321,7 +327,7 @@ describe MongoDB::Scanner do
   describe '#legacy_handshake!' do
     before do
       @hello_msg = mock('MongoDB::Protocol::OpQuery')
-      @binary_stream = ('binary string')
+      @binary_stream = 'binary string'
       @hello_msg.stubs(:to_binary_s).returns(@binary_stream)
       @scanner.stubs(:legacy_hello).returns(@hello_msg)
       @tcp_client.stubs(:write).returns(@binary_stream)
@@ -358,7 +364,7 @@ describe MongoDB::Scanner do
   describe '#legacy_build_info!' do
     before do
       @cmd = mock('MongoDB::Protocol::OpQuery')
-      @binary_stream = ('binary string')
+      @binary_stream = 'binary string'
       @cmd.stubs(:to_binary_s).returns(@binary_stream)
       @scanner.stubs(:legacy_build_info).returns(@cmd)
       @tcp_client.stubs(:write).returns(@binary_stream)
@@ -388,7 +394,7 @@ describe MongoDB::Scanner do
   describe '#legacy_build_info!' do
     before do
       @cmd = mock('MongoDB::Protocol::OpQuery')
-      @binary_stream = ('binary string')
+      @binary_stream = 'binary string'
       @cmd.stubs(:to_binary_s).returns(@binary_stream)
       @scanner.stubs(:legacy_list_databases).returns(@cmd)
       @tcp_client.stubs(:write).returns(@binary_stream)
@@ -430,17 +436,19 @@ describe MongoDB::Scanner do
     it 'reads the response from the MongoDB service' do
       @tcp_client.stubs(:write).with(@cmd)
       @scanner.expects(:read_reply_msg).with(@tcp_client).returns(@response)
+
       assert_equal(@response, @scanner.send_legacy_command!(@cmd))
     end
   end
 
   describe '#findings_to_json' do
     before do
-      @pretty_findings = { results: "pretty findings" }.to_json
+      @pretty_findings = { results: 'pretty findings' }.to_json
     end
 
     it 'returns a formatted string of the findings' do
       @findings.stubs(:to_json).returns(@pretty_findings)
+
       assert_equal(@pretty_findings, @scanner.findings_to_json)
     end
   end
@@ -461,22 +469,24 @@ describe MongoDB::Scanner do
   describe '#supports_op_msg?' do
     it 'returns true if the MongoDB service supports OpMsg message protocols' do
       @scanner.instance_variable_set(:@supports_op_msg, true)
-      assert(@scanner.supports_op_msg?)
+
+      assert_predicate(@scanner, :supports_op_msg?)
     end
 
     it 'returns false if the MongoDB service supports OpMsg message protocol is not supported' do
-      assert(!@scanner.supports_op_msg?)
+      refute_predicate(@scanner, :supports_op_msg?)
     end
   end
 
   describe '#mongo_detected?' do
     it 'returns true if the MongoDB service is detected' do
       @scanner.instance_variable_set(:@mongo_detected, true)
-      assert(@scanner.mongo_detected?)
+
+      assert_predicate(@scanner, :mongo_detected?)
     end
 
     it 'returns false if the MongoDB service is not detected' do
-      assert(!@scanner.mongo_detected?)
+      refute_predicate(@scanner, :mongo_detected?)
     end
   end
 end
