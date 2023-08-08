@@ -1,6 +1,11 @@
 MongoDB Scanner
 ---------------
-This a basic MongoDB scanner written in Ruby.
+This a basic MongoDB scanner written in Ruby to collect the following
+information:
+
+* Hello handshake response (Wired version protocol, isWritablePrimary, SSL support, etc).
+* BuildInfo (Version, Operating System, etc).
+* Database list (if those are not protected by authentication).
 
 Requirements
 ------------
@@ -9,8 +14,8 @@ Requirements
 * BSON
 * OpenSSL
 
-How to install the dependencies
--------------------------------
+How to install dependencies
+---------------------------
 ```
 bundle install
 ```
