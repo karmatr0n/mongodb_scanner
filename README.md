@@ -1,7 +1,5 @@
 MongoDB Scanner
-[![Build Status][ghactions-img]][ghactions-url]
-[![Coverage Status][coveralls-img]][coveralls-url]
-====
+---------------
 This a basic MongoDB scanner written in Ruby.
 
 Requirements
