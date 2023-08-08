@@ -20,5 +20,6 @@ group :test do
   gem 'rbkb'
   gem 'mocha'
   gem 'simplecov'
+  gem 'simplecov-json'
   gem 'rake'
 end

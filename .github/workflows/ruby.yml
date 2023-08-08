@@ -36,3 +36,10 @@ jobs:
         bundler-cache: true # runs 'bundle install' and caches installed gems automatically
     - name: Run tests
       run: bundle exec rake
+
+    # Using the current repo to perform coverage analysis
+    - uses: karmatr0n/simplecov-check-action@main
+      with:
+        minimum_suite_coverage: 70
+        minimum_file_coverage: 50
+        github_token: ${{ secrets.GITHUB_TOKEN }}
