@@ -1,17 +1,24 @@
-# mongodb_scanner
-Basic MongoDB scanner written in Ruby
+MongoDB Scanner
+[![Build Status][ghactions-img]][ghactions-url]
+[![Coverage Status][coveralls-img]][coveralls-url]
+====
+This a basic MongoDB scanner written in Ruby.
 
-## Requirements
+Requirements
+------------
 * Ruby 3.2.2
-* Bindata gems
-* OpenSSL gem
+* Bindata
+* BSON
+* OpenSSL
 
-# How to install the dependencies
+How to install the dependencies
+-------------------------------
 ```
 bundle install
 ```
 
-## Usage
+Usage
+-----
 ```
 bin/mongodb_scanner -i <ip> -p <port>
 ```
@@ -22,10 +29,12 @@ or
 bin/mongodb_scanner --help
 ```
 
-## LICENSE
+LICENSE
+-------
 MIT
 
-## References
+References
+----------
 * [Ruby](https://www.ruby-lang.org/en/)
 * [BinData](https://github.com/dmendel/bindata)
 * [BSON](https://github.com/mongodb/bson-ruby)
