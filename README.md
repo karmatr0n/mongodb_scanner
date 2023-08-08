@@ -21,3 +21,14 @@ or
 ```
 bin/mongodb_scanner --help
 ```
+
+## LICENSE
+MIT
+
+## References
+* [Ruby](https://www.ruby-lang.org/en/)
+* [BinData](https://github.com/dmendel/bindata)
+* [BSON](https://github.com/mongodb/bson-ruby)
+* [OpenSSL for Ruby](https://github.com/ruby/openssl)
+* [minitest](https://github.com/minitest/minitest)
+
