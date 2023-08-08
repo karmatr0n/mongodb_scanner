@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'logger'
 require_relative 'tcp_client'
 require_relative 'protocol'
 require_relative 'helpers/protocol_msg_helper'
@@ -12,18 +13,19 @@ module MongoDB
     include MongoDB::Helpers::LegacyProtocolMsgHelper
     include MongoDB::ScanResults
 
-    attr_reader :tcp_client, :supports_op_msg, :findings
+    attr_reader :tcp_client, :supports_op_msg, :findings, :logger
 
     def initialize(host, port)
       @tcp_client = TCPClient.new(host, port)
       @supports_op_msg = false
       @mongo_detected = false
       @findings = FindingList.new
+      @logger = Logger.new(STDOUT)
     end
 
     def run!
       @tcp_client.connect
-      @findings.add(:ssl_enabled, @tcp_client.ssl_enabled)
+      findings.add(:ssl_enabled, @tcp_client.ssl_enabled)
       perform_scan
       perform_legacy_scan unless supports_op_msg?
     end
@@ -49,6 +51,10 @@ module MongoDB
       response = read_op_msgs(@tcp_client, length: 2)
       documents = response.map(&:sections).map { |section| section.map(&:payload) }.flatten
       parse_hello_response(documents)
+    rescue IndexError => _e
+      logger.warn('Invalid response for handshake based on OP_MSG')
+    ensure
+      findings.add(:mongo_detected, mongo_detected?)
     end
 
     def parse_hello_response(documents)
@@ -60,7 +66,7 @@ module MongoDB
     def parse_hello_section(section)
       @mongo_detected = true
       @supports_op_msg = true if section['maxWireVersion'] >= 6
-      @findings.add(:hello, section.to_h)
+      findings.add(:hello, section.to_h)
     end
 
     def build_info!
@@ -79,12 +85,16 @@ module MongoDB
     end
 
     def add_finding!(section, response_msg)
-      @findings.add(section, response_msg.sections.map(&:payload).to_a.map(&:to_h))
+      findings.add(section, response_msg.sections.map(&:payload).to_a.map(&:to_h))
     end
 
     def legacy_handshake!
       response = send_legacy_command!(legacy_hello.to_binary_s)
       parse_hello_response(response.documents)
+    rescue Errno::EPIPE => _e
+      logger.warn('Invalid response received for handshake based on OP_QUERY')
+    ensure
+      findings.add(:mongo_detected, mongo_detected?)
     end
 
     def legacy_build_info!
@@ -103,11 +113,11 @@ module MongoDB
     end
 
     def legacy_add_finding!(section, response_msg)
-      @findings.add(section, response_msg.documents.map(&:to_h))
+      findings.add(section, response_msg.documents.map(&:to_h))
     end
 
     def findings_to_json
-      @findings.to_json
+      findings.to_json
     end
 
     def supports_op_msg?

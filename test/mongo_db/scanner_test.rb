@@ -10,6 +10,8 @@ describe MongoDB::Scanner do
     MongoDB::TCPClient.stubs(:new).returns(@tcp_client)
     @findings = mock('MongoDB::ScanResults::FindingList')
     MongoDB::ScanResults::FindingList.stubs(:new).returns(@findings)
+    @logger = mock('Logger')
+    Logger.stubs(:new).with(STDOUT).returns(@logger)
     @scanner = MongoDB::Scanner.new(@host, @port)
   end
 
@@ -149,7 +151,14 @@ describe MongoDB::Scanner do
     end
 
     it 'adds the hello response to the findings' do
-      @findings.expects(:add)
+      @findings.expects(:add).with(:mongo_detected, true)
+      @scanner.handshake!
+    end
+
+    it 'logs a warning when the handshake response is invalid' do
+      @scanner.stubs(:read_op_msgs).with(@tcp_client, length: 2).raises(IndexError)
+      @logger.expects(:warn).with('Invalid response for handshake based on OP_MSG')
+      @findings.expects(:add).with(:mongo_detected, false)
       @scanner.handshake!
     end
   end
@@ -335,6 +344,13 @@ describe MongoDB::Scanner do
 
     it 'adds the hello response to the findings' do
       @findings.expects(:add)
+      @scanner.legacy_handshake!
+    end
+
+    it 'logs a warning when the handshake response is invalid' do
+      @scanner.stubs(:read_reply_msg).with(@tcp_client).raises(Errno::EPIPE)
+      @logger.expects(:warn).with('Invalid response received for handshake based on OP_QUERY')
+      @findings.expects(:add).with(:mongo_detected, false)
       @scanner.legacy_handshake!
     end
   end
