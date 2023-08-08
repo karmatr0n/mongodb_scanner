@@ -16,11 +16,11 @@ module MongoDB
           'topologyVersion' => { 'processId' => BSON::ObjectId('000000000000000000000001'), 'counter' => BSON::Int64.new(1) },
           'client' => {
             'application' => {
-              'name' => "MongoDB Scanner"
+              'name' => 'MongoDB Scanner'
             },
             'driver' => {
-              'name' => "MongoDB Scanner",
-              'version' => "1.0.0"
+              'name' => 'MongoDB Scanner',
+              'version' => '1.0.0'
             },
             'os' => {
               'type' => RUBY_PLATFORM
@@ -31,7 +31,7 @@ module MongoDB
       end
 
       def current_op_msg
-        cmd = { '$currentOp' => { }, '$db' => 'admin' }
+        cmd = { '$currentOp' => {}, '$db' => 'admin' }
         op_msg(sections: [MongoDB::Protocol::DocumentSection.new(payload_type: 0, payload: cmd)])
       end
 
@@ -52,13 +52,13 @@ module MongoDB
       end
 
       def op_msg(flag_bits: [MongoDB::Protocol::FlagBits::EXHAUST_ALLOWED], sections: [])
-        op_msg = MongoDB::Protocol::OpMsg.new(flag_bits: flag_bits, sections: sections)
+        op_msg = MongoDB::Protocol::OpMsg.new(flag_bits:, sections:)
         op_msg.header = msg_header(op_msg.to_binary_s.size)
         op_msg
       end
 
       def read_op_msgs(socket, length: 1)
-        obj = BinData::Array.new(:type => :op_msg, initial_length: length)
+        obj = BinData::Array.new(type: :op_msg, initial_length: length)
         obj.read(socket)
       end
     end

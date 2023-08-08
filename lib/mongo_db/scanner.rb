@@ -24,11 +24,11 @@ module MongoDB
     def run!
       @tcp_client.connect
       @findings.add(:ssl_enabled, @tcp_client.ssl_enabled)
-      perform_scan!
-      perform_legacy_scan! unless supports_op_msg?
+      perform_scan
+      perform_legacy_scan unless supports_op_msg?
     end
 
-    def perform_scan!
+    def perform_scan
       handshake!
       return unless mongo_detected? && supports_op_msg?
 
@@ -36,7 +36,7 @@ module MongoDB
       list_databases!
     end
 
-    def perform_legacy_scan!
+    def perform_legacy_scan
       legacy_handshake!
       return unless mongo_detected?
 
@@ -64,16 +64,16 @@ module MongoDB
     end
 
     def build_info!
-      response = send_command(build_info_msg.to_binary_s)
+      response = send_command!(build_info_msg.to_binary_s)
       add_finding!(:build_info, response.first)
     end
 
     def list_databases!
-      response = send_command(list_databases_msg.to_binary_s)
+      response = send_command!(list_databases_msg.to_binary_s)
       add_finding!(:databases, response.first)
     end
 
-    def send_command(payload)
+    def send_command!(payload)
       @tcp_client.write(payload)
       read_op_msgs(@tcp_client)
     end
@@ -83,21 +83,21 @@ module MongoDB
     end
 
     def legacy_handshake!
-      response = send_legacy_command(legacy_hello.to_binary_s)
+      response = send_legacy_command!(legacy_hello.to_binary_s)
       parse_hello_response(response.documents)
     end
 
     def legacy_build_info!
-      response = send_legacy_command(legacy_build_info.to_binary_s)
+      response = send_legacy_command!(legacy_build_info.to_binary_s)
       legacy_add_finding!(:build_info, response)
     end
 
     def legacy_list_databases!
-      response = send_legacy_command(legacy_list_databases.to_binary_s)
+      response = send_legacy_command!(legacy_list_databases.to_binary_s)
       legacy_add_finding!(:databases, response)
     end
 
-    def send_legacy_command(payload)
+    def send_legacy_command!(payload)
       @tcp_client.write(payload)
       read_reply_msg(@tcp_client)
     end

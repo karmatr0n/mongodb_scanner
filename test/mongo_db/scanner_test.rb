@@ -27,8 +27,8 @@ describe MongoDB::Scanner do
     before do
       @tcp_client.stubs(:connect)
       @tcp_client.stubs(:ssl_enabled).returns(true)
-      @scanner.stubs(:perform_scan!)
-      @scanner.stubs(:perform_legacy_scan!)
+      @scanner.stubs(:perform_scan)
+      @scanner.stubs(:perform_legacy_scan)
       @findings.stubs(:add)
     end
 
@@ -43,18 +43,18 @@ describe MongoDB::Scanner do
     end
 
     it 'performs the scan_results' do
-      @scanner.expects(:perform_scan!)
+      @scanner.expects(:perform_scan)
       @scanner.run!
     end
 
     it 'performs the legacy scan_results' do
       @scanner.instance_variable_set(:@supports_op_msg, false)
-      @scanner.expects(:perform_legacy_scan!)
+      @scanner.expects(:perform_legacy_scan)
       @scanner.run!
     end
   end
 
-  describe '#perform_scan!' do
+  describe '#perform_scan' do
     before do
       @scanner.stubs(:handshake!)
       @scanner.stubs(:mongo_detected?).returns(true)
@@ -65,35 +65,35 @@ describe MongoDB::Scanner do
 
     it 'performs the handshake' do
       @scanner.expects(:handshake!)
-      @scanner.perform_scan!
+      @scanner.perform_scan
     end
 
     it 'builds the build info' do
       @scanner.expects(:build_info!)
-      @scanner.perform_scan!
+      @scanner.perform_scan
     end
 
     it 'lists the databases' do
       @scanner.expects(:list_databases!)
-      @scanner.perform_scan!
+      @scanner.perform_scan
     end
 
     it 'does not get the build info or databases if MongoDB was not detected' do
       @scanner.stubs(:mongo_detected?).returns(false)
       @scanner.expects(:build_info!).never
       @scanner.expects(:list_databases!).never
-      @scanner.perform_scan!
+      @scanner.perform_scan
     end
 
     it 'does not get the build info or databases if OpMS is not supported' do
       @scanner.stubs(:supports_op_msg?).returns(false)
       @scanner.expects(:build_info!).never
       @scanner.expects(:list_databases!).never
-      @scanner.perform_scan!
+      @scanner.perform_scan
     end
   end
 
-  describe '#perform_legacy_scan!' do
+  describe '#perform_legacy_scan' do
     before do
       @scanner.stubs(:legacy_handshake!)
       @scanner.stubs(:mongo_detected?).returns(true)
@@ -103,24 +103,24 @@ describe MongoDB::Scanner do
 
     it 'performs the legacy handshake' do
       @scanner.expects(:legacy_handshake!)
-      @scanner.perform_legacy_scan!
+      @scanner.perform_legacy_scan
     end
 
     it 'builds the build info with legacy command' do
       @scanner.expects(:legacy_build_info!)
-      @scanner.perform_legacy_scan!
+      @scanner.perform_legacy_scan
     end
 
     it 'lists the databases with legacy command' do
       @scanner.expects(:legacy_list_databases!)
-      @scanner.perform_legacy_scan!
+      @scanner.perform_legacy_scan
     end
 
     it 'does not get the build info or databases if MongoDB was not detected' do
       @scanner.stubs(:mongo_detected?).returns(false)
       @scanner.expects(:legacy_build_info!).never
       @scanner.expects(:legacy_build_info!).never
-      @scanner.perform_legacy_scan!
+      @scanner.perform_legacy_scan
     end
   end
 
@@ -275,7 +275,7 @@ describe MongoDB::Scanner do
     end
   end
 
-  describe '#send_command' do
+  describe '#send_command!' do
     before do
       @cmd = mock('MongoDB::Protocol::OpMsg')
       @response = mock('MongoDB::Protocol::OpMsg')
@@ -284,13 +284,13 @@ describe MongoDB::Scanner do
     it 'sends a command to the MongoDB service' do
       @tcp_client.expects(:write).with(@cmd)
       @scanner.stubs(:read_op_msgs).with(@tcp_client).returns(@response)
-      @scanner.send_command(@cmd)
+      @scanner.send_command!(@cmd)
     end
 
     it 'reads the response from the MongoDB service' do
       @tcp_client.stubs(:write).with(@cmd)
       @scanner.expects(:read_op_msgs).with(@tcp_client).returns(@response)
-      assert_equal(@response, @scanner.send_command(@cmd))
+      assert_equal(@response, @scanner.send_command!(@cmd))
     end
   end
 
@@ -399,7 +399,7 @@ describe MongoDB::Scanner do
     end
   end
 
-  describe '#send_legacy_command' do
+  describe '#send_legacy_command!' do
     before do
       @cmd = mock('MongoDB::Protocol::OpQuery')
       @response = mock('MongoDB::Protocol::OpReply')
@@ -408,13 +408,13 @@ describe MongoDB::Scanner do
     it 'sends a command to the MongoDB service' do
       @tcp_client.expects(:write).with(@cmd)
       @scanner.stubs(:read_reply_msg).with(@tcp_client).returns(@response)
-      @scanner.send_legacy_command(@cmd)
+      @scanner.send_legacy_command!(@cmd)
     end
 
     it 'reads the response from the MongoDB service' do
       @tcp_client.stubs(:write).with(@cmd)
       @scanner.expects(:read_reply_msg).with(@tcp_client).returns(@response)
-      assert_equal(@response, @scanner.send_legacy_command(@cmd))
+      assert_equal(@response, @scanner.send_legacy_command!(@cmd))
     end
   end
 

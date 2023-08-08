@@ -14,13 +14,14 @@ module MongoDB
       def legacy_build_info
         msg_op_query({ buildInfo: 1 })
       end
+
       def legacy_list_databases
         msg_op_query({ listDatabases: 1 })
       end
 
       def legacy_msg_header(length, op_code = MongoDB::Protocol::OpCodes::OP_QUERY)
         MongoDB::Protocol::MsgHeader.new(
-          message_length: length, request_id: 0, response_to: 0, op_code: op_code
+          message_length: length, request_id: 0, response_to: 0, op_code:
         )
       end
 
