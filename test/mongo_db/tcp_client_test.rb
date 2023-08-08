@@ -10,9 +10,11 @@ describe MongoDB::TCPClient do
     @tcp_socket = mock('TCPSocket')
     @ssl_socket = mock('OpenSSL::SSL::SSLSocket')
     @context = mock('OpenSSL::SSL::SSLContext')
+    TCPSocket.stubs(:open).with(@host, @port).returns(@tcp_socket)
+    @tcp_socket.stubs(:setsockopt).with(Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1)
     OpenSSL::SSL::SSLContext.stubs(:new).returns(@context)
     @context.stubs(:verify_mode=).with(OpenSSL::SSL::VERIFY_NONE)
-    OpenSSL::SSL::SSLSocket.stubs(:new).returns(@ssl_socket)
+    OpenSSL::SSL::SSLSocket.stubs(:new).with(@tcp_socket, @context).returns(@ssl_socket)
     @ssl_socket.stubs(:connect)
   end
 
