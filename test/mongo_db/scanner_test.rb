@@ -193,7 +193,7 @@ describe MongoDB::Scanner do
     end
   end
 
-  describe '#parse_hello_section' do
+  describe '#parse_hello!' do
     before do
       @section = {
         'ok' => 1.0,
@@ -203,7 +203,7 @@ describe MongoDB::Scanner do
     end
 
     it 'sets mongo as detected and with supports for OpMsg' do
-      @scanner.parse_hello_section(@section)
+      @scanner.parse_hello!(@section)
 
       assert_predicate(@scanner, :mongo_detected?)
       assert_predicate(@scanner, :supports_op_msg?)
@@ -211,7 +211,7 @@ describe MongoDB::Scanner do
 
     it 'detects mongodb without support for OpMsg' do
       @section['maxWireVersion'] = 5.1
-      @scanner.parse_hello_section(@section)
+      @scanner.parse_hello!(@section)
 
       assert_predicate(@scanner, :mongo_detected?)
       refute_predicate(@scanner, :supports_op_msg?)
@@ -219,7 +219,7 @@ describe MongoDB::Scanner do
 
     it 'adds the hello response to the findings' do
       @findings.expects(:add).with(:hello, @section)
-      @scanner.parse_hello_section(@section)
+      @scanner.parse_hello!(@section)
     end
   end
 

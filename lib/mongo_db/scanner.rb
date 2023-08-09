@@ -59,11 +59,11 @@ module MongoDB
 
     def parse_hello_response(documents)
       documents.each do |section|
-        parse_hello_section(section) if section['ok'] == 1.0
+        parse_hello!(section) if section['ok'] == 1.0
       end
     end
 
-    def parse_hello_section(section)
+    def parse_hello!(section)
       @mongo_detected = true
       @supports_op_msg = true if section['maxWireVersion'] >= 6
       findings.add(:hello, section.to_h)
