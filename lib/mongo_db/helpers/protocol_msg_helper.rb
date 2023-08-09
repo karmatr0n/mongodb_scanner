@@ -31,11 +31,6 @@ module MongoDB
         op_msg(sections: [document_section(payload: cmd)])
       end
 
-      def current_op_msg
-        cmd = { '$currentOp' => {}, '$db' => 'admin' }
-        op_msg(sections: [document_section(payload: cmd)])
-      end
-
       def build_info_msg
         cmd = { 'buildInfo' => 1, '$db' => 'test' }
         op_msg(sections: [document_section(payload: cmd)])
