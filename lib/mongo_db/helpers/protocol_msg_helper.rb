@@ -2,11 +2,12 @@
 
 require 'bson'
 require 'bindata'
+require_relative 'utils_protocol_msg_helper'
 
 module MongoDB
   module Helpers
     module ProtocolMsgHelper
-      include MongoDB::Protocol
+      include MongoDB::Helpers::UtilsProtocolMsgHelper
 
       def hello_msg
         cmd = {
@@ -27,34 +28,26 @@ module MongoDB
             }
           }
         }
-        op_msg(sections: [MongoDB::Protocol::DocumentSection.new(payload_type: 0, payload: cmd)])
+        op_msg(sections: [document_section(payload: cmd)])
       end
 
       def current_op_msg
         cmd = { '$currentOp' => {}, '$db' => 'admin' }
-        op_msg(sections: [MongoDB::Protocol::DocumentSection.new(payload_type: 0, payload: cmd)])
+        op_msg(sections: [document_section(payload: cmd)])
       end
 
       def build_info_msg
         cmd = { 'buildInfo' => 1, '$db' => 'test' }
-        op_msg(sections: [MongoDB::Protocol::DocumentSection.new(payload_type: 0, payload: cmd)])
+        op_msg(sections: [document_section(payload: cmd)])
       end
 
       def list_databases_msg
         cmd = { listDatabases: 1, '$db' => 'admin' }
-        op_msg(sections: [MongoDB::Protocol::DocumentSection.new(payload_type: 0, payload: cmd)])
+        op_msg(sections: [document_section(payload: cmd)])
       end
 
-      def msg_header(length)
-        MongoDB::Protocol::MsgHeader.new(
-          message_length: length, request_id: 0, response_to: 0, op_code: MongoDB::Protocol::OpCodes::OP_MSG
-        )
-      end
-
-      def op_msg(flag_bits: [MongoDB::Protocol::FlagBits::EXHAUST_ALLOWED], sections: [])
-        op_msg = MongoDB::Protocol::OpMsg.new(flag_bits:, sections:)
-        op_msg.header = msg_header(op_msg.to_binary_s.size)
-        op_msg
+      def document_section(payload_type: 0, payload: nil)
+        MongoDB::Protocol::DocumentSection.new(payload_type:, payload:)
       end
 
       def read_op_msgs(socket, length: 1)
