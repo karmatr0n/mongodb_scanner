@@ -20,7 +20,7 @@ module MongoDB
       @supports_op_msg = false
       @mongo_detected = false
       @findings = FindingList.new
-      @logger = Logger.new(STDOUT)
+      @logger = Logger.new($stdout)
     end
 
     def run!
