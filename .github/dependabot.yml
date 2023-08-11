@@ -10,6 +10,4 @@ updates:
     schedule:
       interval: "weekly"
     commit-message:
-      prefix: "bundler-prod"
-      prefix-development: "bundler-dev"
-      prefix-test: "bundler-test"
+      prefix: "bundler"
