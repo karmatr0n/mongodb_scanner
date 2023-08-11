@@ -22,7 +22,7 @@ module MongoDB
         end
       end
 
-      def to_json
+      def to_json(*_args)
         JSON.pretty_generate(to_h.as_extended_json)
       end
 

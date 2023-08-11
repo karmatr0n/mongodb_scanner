@@ -21,8 +21,8 @@ module MongoDB
         raw_bytes = BSONReader.read(io).to_binary_s
         buffer = BSON::ByteBuffer.new(raw_bytes)
         BSON::Document.from_bson(buffer, mode: :bson)
-      rescue StandardError => exception
-        raise IOError, "Invalid BSON: #{exception.inspect}"
+      rescue StandardError => e
+        raise IOError, "Invalid BSON: #{e.inspect}"
       end
     end
   end

@@ -17,9 +17,9 @@ group :test do
   gem 'minitest-line'
   gem 'minitest-reporters'
   gem 'minitest-spec-context'
-  gem 'rbkb'
   gem 'mocha'
+  gem 'rake'
+  gem 'rbkb'
   gem 'simplecov'
   gem 'simplecov-json'
-  gem 'rake'
 end
