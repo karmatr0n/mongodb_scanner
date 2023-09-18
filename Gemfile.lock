@@ -22,7 +22,7 @@ GEM
       builder
       minitest (>= 5.0)
       ruby-progressbar
-    minitest-spec-context (0.0.4)
+    minitest-spec-context (0.0.5)
     mocha (2.1.0)
       ruby2_keywords (>= 0.0.5)
     openssl (3.1.0)
